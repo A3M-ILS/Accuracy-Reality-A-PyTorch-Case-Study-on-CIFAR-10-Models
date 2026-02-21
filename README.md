@@ -97,6 +97,16 @@ In this project:
 - This provides a statistically reliable estimate of performance
 
 ---
+## Model Weights
+
+Model weights are not included in this repository due to size limits.
+
+To generate them, run:
+
+```bash
+python train_resnet18.py
+python train_resnet101.py
+```
 
 ## Tech Stack
 
