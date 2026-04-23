@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      # Expecting the PTH files to be either copied during build or volume-mounted
+      - RESNET18_PATH=/app/models/resnet18_cifar10_32.pth
+      - RESNET101_PATH=/app/models/resnet101_cifar10_224.pth
+      - PORT=8000
+    volumes:
+      # Mount source code for hot reload locally
+      - ./backend:/app
+      # Mount the model files from the root of the project into the container's /app/models
+      # Only do this if models are not baked into the image.
+      - ./resnet18_cifar10_32.pth:/app/models/resnet18_cifar10_32.pth:ro
+      - ./resnet101_cifar10_224.pth:/app/models/resnet101_cifar10_224.pth:ro
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+    # To support local development without constant rebuilding:
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
